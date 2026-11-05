@@ -1,124 +1,195 @@
 # AIエージェント/AX プロダクト立ち上げ計画
 
-> 作成: 2026-07-09 / owner: hiroshi_takizawa / GitHub org: hiroshi57 (Public)
-> ローカル配置: `C:/Users/hiroshi_takizawa/<repo>` / 差別化必須・模倣禁止
-> ※案件は追加予定（「他の案件も追加します」）
+> 作成: 2026-07-09 / 最終検証: 2026-11-05 / owner: hiroshi_takizawa / GitHub org: hiroshi57 (Public)
+> ローカル配置: `C:/Users/hiroshi_takizawa/<repo>` / 他ツールの単純コピーは不可（差別化コア必須）
+> 収益面の反証は `revenue-refutation.md`、企画群は `suite-30-plan.md` ほかを参照
 
-## 開発順
-6 → 5 → 1 → 4 → 2 → 3 → 7 → 8 → B/C系（順序未確定）
+---
 
-## タスク台帳
+## 0. 用語定義（この台帳での「完了」の意味）
 
-### 原案 1-8（成果: scaffold + 動く最小1機能）
+旧版の `✅本番` を実態に合わせて 5 段階に分解した。**外部提示時はこの定義を必ず併記する。**
 
-| # | repo | 概要 | 差別化 | status |
-|---|------|------|--------|--------|
-| 1 | dify-rag-approval-agent | Dify社内RAG+承認フロー | 引用必須+監査ログ | ✅本番+尖った武器(規程改定差分追跡+回答陳腐化検知, test28) |
-| 2 | tool-calling-agent-mvp | function callingツール操作 | ドライラン+可逆ログ | ✅本番+尖った武器(操作リスクスコアリング+承認ポリシー, test25) |
-| 3 | agent-roi-poc | ROI導入前後比較PoC | 信頼区間+人間介入率 | ✅本番+外販強化(因果推論ROI:合成対照法+DID+プラセボ検定, test27) |
-| 4 | context-rerank-search | RAG+リランキング検索 | 根拠説明+eval同梱 | ✅本番+尖った武器(反実仮想説明:なぜ他文書が負けたか, test21) |
-| 5 | geo-audit-tool | 生成AI検索GEO診断 | 構造スコア+競合比較 | ✅本番+外販強化(日本語×業界別GEO+Share of Voice引用シェア時系列, test26) |
-| 6 | ai-platform-template | AI基盤テンプレート ★土台 | LLM自動ルーティング+観測性 | ✅本番+外販強化(FinOps for LLM:月次コスト予測+予算アラート+予算内ルーティング, test31) |
-| 7 | proactive-agent-ux | プロアクティブUX | 提案理由+ワンクリック | ✅本番+尖った武器(バンディット型提案ランキング Thompson, test23) |
-| 8 | physical-ai-llm-demo | LLM×シミュレータ | プラン安全性検証 | ✅本番+尖った武器(形式的安全仕様エンジン:宣言的不変条件+反例, test32) |
+| 成熟度 | 定義 | 判定に必要な証跡 |
+|--------|------|------------------|
+| L0 repo | リポジトリが存在し push 済み | GitHub API で存在確認 |
+| L1 実装 | 差別化コアがコードとして存在 | 該当モジュールのパス |
+| L2 検証 | 自動テストが存在し CI が緑 | gh run list の conclusion=success |
+| L3 デモ公開 | 静的/疑似データで外部から閲覧可能 | HTTP 200 + 実測バイト数 |
+| L4 本番稼働 | 実データ・実ユーザー・実LLM課金で稼働し SLO/監視あり | 稼働ログ・監視・利用者数 |
 
-### B/C系（成果: repo + 仕様書ドラフト → 承認後に実装）
+**現状: L3 が 12 本、L2 未達が 2 本（CI 失敗1・CI 無し1）、公開停止が 1 本。L4（本番稼働）は 0 件。**
+旧記載の `✅本番` は「デモ公開」の意味であり、実ユーザー稼働ではない。営業資料での「本番稼働」表記は不可。
 
-| # | repo | 概要 | 差別化 | status |
-|---|------|------|--------|--------|
-| B1 | ax-audit-platform | AX診断→PoC見積自動化 | マーケ5業務プリセット+ドメイン知識 | ✅本番+尖った武器(業界ベンチマーク偏差値+ROI感度分析, test24) |
-| B2 | ai-advisor-os | AI顧問OS 1人50社 | 顧問承認フロー+匿名ベンチマーク | ✅本番+尖った武器(顧問トリアージエンジン:リスク×価値で50社優先順位, test26) |
-| B3 | d-airs-dashboard | AI定着スコアD-AIRS | 定着継続計測+介入効果測定 | ✅本番+尖った武器(定着将来予測+離脱早期予兆, test23) |
-| B4 | matching-agent-engine | 対話型マッチング(アダプタ式) | 実在IDのみ+広告示唆還元 | ✅本番+尖った武器(成約寄与条件uplift分析→広告ターゲティング, test22) |
-| C1 | dev-agent-platform | 開発エージェント生産性基盤 | AI寄与率計測→営業転用 | ✅本番+尖った武器(AI寄与の因果効果推定+ゲーミング検知, test23) |
+---
 
-**全13リポジトリ 差別化コア実装+push完了(2026-07-09)。B/C系の全機能拡張は承認後。**
+## 1. 開発順
 
-全リポジトリ作成済み: 2026-07-09
+6 → 5 → 1 → 4 → 2 → 3 → 7 → 8 → B/C系（順序未確定） → A1 corral（2026-07-24 以降、実質最優先）
+
+---
+
+## 2. タスク台帳
+
+> test 列は `def test_` の実測数（2026-11-05）。旧版の test28 等は 2026-07 時点の値で、
+> 現在は増えている（例: #1 は 28 → 102、#6 は 31 → 226）。数値を引用する際は測定日を併記する。
+
+### 原案 1-8
+
+| # | repo | 概要 | 差別化コア | test | CI | 成熟度 |
+|---|------|------|-----------|------|----|-------|
+| 1 | dify-rag-approval-agent | Dify社内RAG+承認フロー | 引用必須+監査ログ／規程改定差分追跡+回答陳腐化検知 | 102 | ❌ **最新 run が failure (2026-08-20)** | L2未達 |
+| 2 | tool-calling-agent-mvp | function callingツール操作 | ドライラン+可逆ログ／操作リスクスコア+承認ポリシー | 25 | ❌ **ワークフロー無し** | L2未達 |
+| 3 | agent-roi-poc | ROI導入前後比較PoC | 信頼区間+人間介入率／因果推論ROI(合成対照法+DID+プラセボ検定) | 27 | ✅ (2026-10-20) | L3 |
+| 4 | context-rerank-search | RAG+リランキング検索 | 根拠説明+eval同梱／反実仮想説明 | 21 | ✅ | L3 |
+| 5 | geo-audit-tool | 生成AI検索GEO診断 | 構造スコア+競合比較／日本語×業界別+引用シェア時系列 | 26 | ✅ | L3 |
+| 6 | ai-platform-template | AI基盤テンプレート ★土台 | LLM自動ルーティング+観測性／FinOps(コスト予測+予算アラート) | 226 | ✅ (2026-10-28) | L3 |
+| 7 | proactive-agent-ux | プロアクティブUX | 提案理由+ワンクリック／バンディット提案ランキング(Thompson) | 23 | ✅ | L3 |
+| 8 | physical-ai-llm-demo | LLM×シミュレータ | プラン安全性検証／形式的安全仕様エンジン | 32 | ✅ | L3 |
+
+### B/C系
+
+| # | repo | 概要 | 差別化コア | test | CI | 成熟度 |
+|---|------|------|-----------|------|----|-------|
+| B1 | ax-audit-platform | AX診断→PoC見積自動化 | マーケ5業務プリセット／業界ベンチ偏差値+ROI感度分析 | 24 | ✅ | **L3未達（公開URLが404）** |
+| B2 | ai-advisor-os | AI顧問OS 1人50社 | 顧問承認フロー／トリアージ(リスク×価値で50社優先順位) | 26 | ✅ | L3 |
+| B3 | d-airs-dashboard | AI定着スコアD-AIRS | 定着継続計測／将来予測+離脱早期予兆 | 23 | ✅ | L3 |
+| B4 | matching-agent-engine | 対話型マッチング(アダプタ式) | 実在IDのみ／成約寄与条件uplift→広告ターゲティング | 22 | ✅ | L3 |
+| C1 | dev-agent-platform | 開発エージェント生産性基盤 | AI寄与率計測／因果効果推定+ゲーミング検知 | 31 | ✅ | L3 |
+
+> **未検証（推測で断定しないこと）**: 上記の統計的手法（合成対照法／DID／プラセボ検定／Thompson
+> sampling／uplift／因果効果推定）は、コードの存在は確認済みだが **手法の妥当性（推定量の一致性・
+> 多重比較補正・サンプルサイズ要件）の第三者レビューは未実施**。顧客に数値を提示する案件
+> （#3・B3・C1）は統計レビューを先行させ、それまでは「参考値」表記を必須とする。
 
 ### 追加案件（2026-07-24〜）
 
-| # | repo | 概要 | 差別化 | status |
-|---|------|------|--------|--------|
-| A1 | corral | Claude Code/Codex 複数エージェントを1つの司令塔から統率するWebオーケストレーター | Orca/herdr等**海外7ツールを統合＋日本語化**。①Web司令塔ペイン ②台数一括起動＋broadcast（継続run方式でワンショットCLIの文脈を保持）③worktree隔離 ④差分レビュー→承認 ⑤**セキュリティ設計を最初から**（Hostヘッダ検証=DNSリバインディング遮断／x-corral-tokenでCSRF遮断／プロンプトをargv非経由=インジェクション不可）。一次情報で機能検証・日本語ドキュメント同梱 | ✅repo作成+push(2026-07-24) / Vercelデモ配信済 / server(Express+ws)+web(Vite+React) |
+| # | repo | 概要 | 差別化 | 成熟度 |
+|---|------|------|--------|-------|
+| A1 | corral | Claude Code/Codex 複数エージェントを1司令塔から統率するWebオーケストレーター | 海外7ツールを調査し**設計思想を選択的に取り込み**、日本語UI/Chatwork/セキュリティ既定で差別化 | L3（テスト・CIは PR #1 で追加中、LICENSE 無し） |
 
-> corral: GitHub https://github.com/hiroshi57/corral / ローカル `C:/Users/hiroshi_takizawa/corral` / デモ https://corral-tau.vercel.app
-> **ターゲット顧客**: Claude Code/Codex を業務導入し始めた開発チーム・受託/SIer（複数エージェント並行運用でタブ管理・レビュー・セキュリティに不安がある層）。
-> **課題**: ①並行運用の煩雑さ(タブ往復) ②レビュー/承認の属人化 ③ローカル実行のセキュリティ不安 ④海外ツールは英語UI。
-> **収益仮説**: 個人=OSS無償 → チーム/企業向け有償(SSO・監査ログ・リモート接続・共有ワークスペース)。
-> **進め方**: 原案1-8方式（動く最小＋差別化コアを先行実装。MVP稼働済 = server(Express+ws)+web(Vite+React)、DEMO/本番モード、継続run、セキュリティ標準装備）。
-> ※本体はローカル常駐デーモン（実CLI起動・worktree操作）。Vercelは**ブラウザ内デモ**（VITE_CORRAL_DEMO=1）でUI/UX確認用。
-> **外販ロードマップ（機能30提案・価格プラン）**: `corral/docs/productization.md`（GitHub: https://github.com/hiroshi57/corral/blob/main/docs/productization.md ）。
-> **最優先5**: ①通知(Chatwork) ②エージェントFinOps ③生産性ダッシュボード ④マルチテナント ⑤SSO/RBAC。
-> **フェーズ**: P1=SaaS土台(テナント/SSO/RBAC/監査ログ/課金) → P2=差別化(FinOps/ダッシュボード/Chatwork通知/インラインレビュー/PR自動化) → P3=エンプラ(クラウド実行/サンドボックス/オンプレVPC/ガードレール/マルチリポ)。
-> **差別化の核**: 日本語ファースト＋国内コンプラ＋Chatwork / セキュリティ標準装備 / エージェントFinOps / 全エージェント中立ハブ。
-> **進捗(2026-07-24)**: 最優先5を全実装・本番反映済。
->   ① 通知(Chatwork/Slack/アプリ内・通知センター) / ② FinOps(トークン・コスト計測/予算アラート/ハードキャップ) /
->   ③ 生産性ダッシュボード(KPI・状態内訳・案件別コスト・累積推移・将来予測・自動総評, recharts) /
->   ④ マルチテナント(**ワークスペース=案件**の器。全タスク/コスト/レビューを案件単位に分離) /
->   ⑤ 認証/RBAC(dev+Google OIDC・HMACセッション・owner/admin/member/viewer 権限マトリクスで API/UI ゲート)。
->   実機で 案件分離・401/403/404・viewer作成拒否 を検証。デモ https://corral-tau.vercel.app に反映。
-> **進捗(2026-07-24, P3 エンプラ)**: Phase3 実装・反映済。
->   #4 マルチリポ(案件が複数リポ→タスクで対象選択) / #20 ガードレール(禁止コマンド起動前ブロック・
->   機密ログ自動マスキング・保護パス/大量変更の承認ブロック) / #5・#18 実行モード抽象(local/docker
->   サンドボックス=--network none・非root・資源制限/ssh リモート実行) / #19 自己ホスト(Dockerfile+
->   docker-compose+docs/enterprise-deploy.md: データ主権/エアギャップ/本番チェックリスト)。
->   検証: 危険プロンプト起動ブロック・repos取得・両ビルド。※docker/ssh 実走は要インフラ(コード/設定は本番同等)。
-> **進捗(2026-07-24, 大企業要件+ドキュメント起点)**:
->   ・監査ログ+SIEM連携: 全操作を構造化記録→JSONL永続化＋SIEM Webhook転送(Splunk/Datadog/汎用)、
->     /audit(owner/admin)・NDJSONエクスポート。guardrail/権限拒否も記録。
->   ・SAML 2.0 SSO: @node-saml/node-saml で metadata/login/acs(Okta/Azure AD等・設定時)。
->   ・**ドキュメントD&D→AIタスク分解→案件へ一括割り当て**: 提案書/議事録/マニュアル(txt/md/csv/json/docx)を
->     ドロップ→タスク候補抽出→レビュー→現案件へ 1タスク=1ワーカー起動。案件をドキュメント起点でAI制御。
->   デモ https://corral-tau.vercel.app に反映。
-> **進捗(2026-07-24, 非課金強化)**: PDF取込(pdfjs-dist・動的import) / LLMプランナー(ドキュメント分解を
->   実エージェントに委譲 /api/intake/plan、demo/失敗時はヒューリスティックにフォールバック) /
->   #6 インラインレビュー(diff行クリックで指摘→差し戻し) / 監査ログのハッシュチェーン改ざん検知。反映済。
-> **進捗(2026-07-24, UI/協働/依存)**: 監査UIビュー(一覧/絞り込み/NDJSONエクスポート/SIEM状態) /
->   メンバー管理UI(招待/ロール変更) / セッションリプレイ#24(ログを時系列再生) /
->   タスクDAG依存#1(dependsOn、依存完了までqueued→自動起動。ドキュメント割当に『順次実行』) /
->   PDF・PPTX取込(pdfjs/jszip)。実機で DAG(B待機→A完了後done)検証。反映済。
-> **進捗(2026-07-25, グラフ・エンジニアリング)**: 参考=angeldot_『GRAPH ENGINEERING CON OPUS 5』
->   (直線でなくグラフでエージェント艦隊を編成)をマージ。①🕸タスクグラフ可視化(dependsOnをDAG描画/
->   トポロジカル階層/状態色/SVG) ②ドキュメント割当の『構成』=並列/直列/段階(フェーズDAG:見出しで
->   フェーズ分割しfan-in/fan-out自動構築)。fan-in DAG(C←A,B)実機検証。反映済 corral-tau。
-> **進捗(2026-07-25, グラフ完全版)**: ①DAG GUIエディタ(ノードドラッグ配置=graphPos永続・ポートから
->   配線・✕削除・循環防止) ②条件付きエッジ(dependsCondition=success/failure/any。失敗時リカバリ経路。
->   色/点線+ラベルクリック切替) ③AIグラフ生成(/intake/graph で『番号|タスク|依存』形式のDAGを直接出力
->   →ref解決しトポロジカル構築。多段fallback) ④横断検索(/search: タイトル/指示/ログ、ヘッダに検索窓)
->   ⑤エージェント自動検出(/agents: --version判定30秒キャッシュ、●利用可/○未検出表示+自動切替)。
->   検証: 失敗時分岐(A error→failure条件のB起動→done)・fan-in・検索(日英)・agents・graph更新。反映済。
-> **進捗(2026-07-25, 運用強化)**: ①プレイブック#2(グラフDAGテンプレ。標準プリセット3種=新機能開発/
->   バグ修正/リファクタリング、現在のグラフからテンプレ抽出、展開でref→session解決しDAG再構築)
->   ②エージェント別ノード自動割当(内容を調査/設計/実装/テスト/文書/レビューに分類×検出済みCLIで担当決定)
->   ③実行キュー上限(CORRAL_MAX_CONCURRENT既定3。超過はqueued待機→スロット解放で作成順に自動起動、
->   ヘッダに同時n/max表示) ④PR自動作成#7(push+gh pr create、本文=指示履歴/差分統計/コスト/介入/
->   ガードレールから自動生成)。検証: 上限2で3件→running2+queued1、テンプレ展開5ノード(依存+failure)、
->   自動割当(調査→claude・テスト→codex)、PRはDEMOで明示拒否+監査記録。反映済。
-> **本番モード E2E検証(2026-08-04)**: `CORRAL_DEMO=0` で実走確認。実プロンプト→実worktree(corral/<id>)→
->   Claude Code(2.1.218)が実ファイル生成→autoAcceptで実commit(1 file/27秒)→main はクリーン(隔離OK)。
->   検出CLI: claude/codex/gh 利用可(gemini・aiderは未検出)。ダッシュボードは同一オリジン配信 http://127.0.0.1:4319。
->   併せて「承認後に差分が空表示」を修正(コミット内容にフォールバック)。グラフUIも整形(折り返し配置/2行ラベル/凡例/ズーム)。
-> **次候補(課金以外)**: PRレビュー結果の取り込み / プレイブックのGUI編集 / 実行スケジューラ(#1 夜間バッチ) / 埋め込みブラウザプレビュー(#5系)。※課金(#26)は保留。
+---
 
-## Vercel 本番デプロイ（2026-07-17・全12本 200 OK確認済み / レスポンシブ対応済み）
+## 3. A1 corral 詳細
 
-> standalone.html を静的公開。#2 tool-calling-agent-mvp はCLIツールのため対象外。
-> 2026-07-17 レスポンシブ強化を全12本に注入・再デプロイ済み（@media max-width:640px / テーブル横スクロール / メトリクス縦積み / viewport）。本番反映を curl で確認済み。
-> scope: takizawahiroshi-gmailcoms-projects / デプロイ元: `C:/Users/hiroshi_takizawa/vercel-deploys/`
+- GitHub https://github.com/hiroshi57/corral / ローカル `C:/Users/hiroshi_takizawa/corral` / デモ https://corral-tau.vercel.app
+- 構成: server(Express+ws, TypeScript) + web(Vite+React)
+- **ターゲット**: Claude Code/Codex を業務導入し始めた開発チーム・受託/SIer
+- **課題**: ①並行運用の煩雑さ ②レビュー/承認の属人化 ③ローカル実行のセキュリティ不安 ④海外ツールは英語UI
+- **収益仮説**: 個人=OSS無償 → チーム/企業向け有償（SSO・監査ログ・リモート接続・共有ワークスペース）
+  - ⚠ **前提未成立**: corral に LICENSE ファイルが無く、公開リポジトリは既定で全権利保留＝**OSS ではない**。
+    オープンコアを採るなら先に LICENSE を決める（例: コア Apache-2.0 / エンタープライズ機能 BUSL-1.1）
+- ※本体はローカル常駐デーモン。Vercel は**ブラウザ内デモ**（VITE_CORRAL_DEMO=1）で UI/UX 確認用。実CLI起動は行わない
 
-| repo | 本番URL |
-|------|---------|
-| dify-rag-approval-agent | https://dify-rag-approval-agent.vercel.app |
-| agent-roi-poc | https://agent-roi-poc.vercel.app |
-| context-rerank-search | https://context-rerank-search.vercel.app |
-| geo-audit-tool | https://geo-audit-tool-delta.vercel.app |
-| ai-platform-template | https://ai-platform-template-ten.vercel.app |
-| proactive-agent-ux | https://proactive-agent-ux.vercel.app |
-| physical-ai-llm-demo | https://physical-ai-llm-demo.vercel.app |
-| ax-audit-platform | https://ax-audit-platform.vercel.app |
-| ai-advisor-os | https://ai-advisor-os-three.vercel.app |
-| d-airs-dashboard | https://d-airs-dashboard.vercel.app |
-| matching-agent-engine | https://matching-agent-engine.vercel.app |
-| dev-agent-platform | https://dev-agent-platform.vercel.app |
-| corral（デモ / 追加案件） | https://corral-tau.vercel.app |
+### 差別化の主張と、その成立範囲（外部提示時はセットで記載）
+
+| 主張 | 成立する範囲 | 成立しない範囲 |
+|------|-------------|---------------|
+| Host ヘッダ検証で DNS リバインディング遮断 | ブラウザ経由・ループバック運用時 | 非ブラウザの攻撃者は Host を自由に設定でき無効。CORRAL_HOST=0.0.0.0 では正規の社内FQDNが弾かれる |
+| x-corral-token で CSRF 遮断 | 単純なクロスサイト POST | XSS・悪性拡張・同端末の別プロセスからは奪取可能 |
+| プロンプトを argv 非経由 | **コマンドインジェクション**は構造的に回避 | **プロンプトインジェクションは防げない**。「インジェクション不可」は誤り |
+| ガードレールで危険コマンドをブロック | 指示文の正規表現一致 | 実行時のコマンド傍受ではないため言い換えで回避可能（ブロックリストの原理的限界） |
+| 監査ログのハッシュチェーン改ざん検知 | チェーン生成 | **検証(verify)が未実装**。再起動で prevHash が genesis に戻り区間跨ぎ検証が不能 |
+| マルチテナント（案件単位分離） | REST API | WebSocket 層は未修正時 分離されない（PR #1 で対応中） |
+
+### セキュリティ修正 PR（2026-10-01 起票・**未マージ**）
+
+https://github.com/hiroshi57/corral/pull/1 — CI は SUCCESS。main には**未反映**。
+コード実査で検出した以下を修正している。マージされるまで main は脆弱なまま。
+
+| 内容 | 深刻度 |
+|------|--------|
+| POST /api/workspaces に権限ゲートが無く、member が自分を owner とする案件を作って権限昇格できる | 高 |
+| セッション署名鍵が API トークンと同一。トークンはブラウザへ配布されるため任意ユーザーのセッションを偽造でき RBAC を迂回できる | 高 |
+| WebSocket が無認証で、接続直後に全案件のセッション・指示文・ログを配信 | 高 |
+| ルート(/) が未認証でオーナートークンを HTML に注入（リモート公開時に閲覧者が owner 化） | 高 |
+| dev ログイン既定ON＋新規ユーザーの既定案件への自動 member 参加（出荷 compose は CORRAL_DEMO=0・0.0.0.0 で起動） | 高 |
+| 子プロセスへ環境変数を全継承し、API トークン/SAML証明書/Chatworkトークンがエージェントに露出 | 高 |
+| pdfjs-dist が GHSA-hq66-cqwq-w95j（悪性PDFで任意JS実行）該当。**PDF の D&D 取込が主機能** | 高 |
+| セッション削除を session:create で判定／notify/test が session:view で viewer から外部送信可 | 中 |
+| 機密マスキングが sk-ant-… / sk-proj-…（ハイフン入り）を捕捉できない | 中 |
+
+### 未解決（PR #1 の対象外・別PR予定）
+
+| 内容 | 深刻度 |
+|------|--------|
+| docker サンドボックスが既定 --network none でエージェントCLIがLLM APIに到達できず機能しない。file 受け渡しではホスト側パスを argv に渡すためコンテナ内で解決不能 | 高 |
+| 監査ログのハッシュチェーンに検証機能が無い／一覧・エクスポートがメモリ5000件のみ（再起動で UI から消える） | 中 |
+| git status --porcelain の固定長スライス解析が rename と日本語ファイル名（core.quotepath）を誤読し保護パス判定を取りこぼす | 中 |
+| 差分表示が未追跡ファイルを含めず、直前コミットへフォールバックして無関係なコミットを表示しうる | 中 |
+| プロンプト平文を worktree 内 .corral/ に書き、承認時に全追加するため対象リポの .gitignore 次第でコミットに混入 | 中 |
+
+### 実装済み機能（時系列）
+
+- 2026-07-24 最優先5: 通知(Chatwork/Slack) / FinOps(コスト計測・予算アラート) / 生産性ダッシュボード / マルチテナント / 認証RBAC
+- 2026-07-24 P3: マルチリポ / ガードレール / 実行モード抽象(local/docker/ssh) / 自己ホスト(Dockerfile+compose)
+- 2026-07-24 大企業要件: 監査ログ+SIEM / SAML 2.0 SSO / ドキュメントD&D→AIタスク分解
+- 2026-07-24 非課金: PDF取込 / LLMプランナー / インラインレビュー / 監査ハッシュチェーン
+- 2026-07-25 UI/協働: 監査UI / メンバー管理 / セッションリプレイ / タスクDAG依存 / PDF・PPTX取込
+- 2026-07-25 グラフ: DAG可視化 / GUIエディタ / 条件付きエッジ / AIグラフ生成 / 横断検索 / エージェント自動検出
+- 2026-07-25 運用: プレイブック / ノード自動割当 / 実行キュー上限 / PR自動作成
+- 2026-08-04 本番モードE2E: 本番モードで実走（実worktree→実commit, 1 file/27秒）
+  - ⚠ **1ファイル1セッションの単発**であり、主張の中心である並列多数エージェント・DAG・queue上限・docker/ssh の実走検証は含まない
+
+---
+
+## 4. 公開URL（Vercel）
+
+> 実体は各リポジトリの静的HTML（サーバーサイド処理・実LLM呼び出しは含まない＝L3）。
+> #2 tool-calling-agent-mvp はCLIツールのため対象外。
+
+| repo | 本番URL | 2026-11-05 実測 |
+|------|---------|----------------|
+| dify-rag-approval-agent | https://dify-rag-approval-agent.vercel.app | 200 / 185 KB |
+| agent-roi-poc | https://agent-roi-poc.vercel.app | 200 / 181 KB |
+| context-rerank-search | https://context-rerank-search.vercel.app | 200 / 193 KB |
+| geo-audit-tool | https://geo-audit-tool-delta.vercel.app | 200 / 191 KB |
+| ai-platform-template | https://ai-platform-template-ten.vercel.app | 200 / 196 KB |
+| proactive-agent-ux | https://proactive-agent-ux.vercel.app | 200 / 190 KB |
+| physical-ai-llm-demo | https://physical-ai-llm-demo.vercel.app | 200 / 189 KB |
+| **ax-audit-platform** | https://ax-audit-platform.vercel.app | ❌ **404 NOT_FOUND（要再デプロイ／URL要確認）** |
+| ai-advisor-os | https://ai-advisor-os-three.vercel.app | 200 / 193 KB |
+| d-airs-dashboard | https://d-airs-dashboard.vercel.app | 200 / 183 KB |
+| matching-agent-engine | https://matching-agent-engine.vercel.app | 200 / 194 KB |
+| dev-agent-platform | https://dev-agent-platform.vercel.app | 200 / 195 KB |
+| corral（デモ） | https://corral-tau.vercel.app | 200 / 435 B（SPAシェル）+ JSバンドル |
+
+> 旧記載「全12本 200 OK確認済み（2026-07-17）」は現時点では成立しない（**11/12**）。
+> URL の生存は劣化するため、**提案書に載せる前に必ず当日再確認する**こと。
+
+---
+
+## 5. 検証ログ（再現コマンド付き）
+
+| 日付 | 対象 | 方法 | 結果 |
+|------|------|------|------|
+| 2026-11-05 | 公開URL 13本 | curl で status と size を実測 | 12/13 が 200、ax-audit-platform のみ 404 |
+| 2026-11-05 | test 関数数 | grep で `def test_` を全 .py から計数 | 21〜226（7月時点から増加。旧 test21〜32 表記は古い） |
+| 2026-11-05 | CI 実績 | gh run list で最新 run を取得 | 11/13 success、dify は failure、tool-calling は run 0 |
+| 2026-11-05 | corral PR #1 | gh pr view で state と checks を取得 | state=OPEN / checks=SUCCESS / **未マージ** |
+| 2026-10-01 | corral セキュリティ | server/src 実コード精査 + npm audit | 権限昇格・WS無認証・秘密継承・脆弱依存を検出（PR #1） |
+
+### 未検証項目
+
+- docker / ssh 実行モードの実走（インフラ未整備。コードのみ）
+- 統計手法の妥当性（第三者レビュー未実施）
+- 顧客側の受容性・価格感度（`revenue-refutation.md` 参照）
+- Vercel 公開ページが「実検索」を名乗る範囲（クライアント内処理か実API呼び出しかは未確認）
+
+---
+
+## 6. 次アクション（優先順）
+
+1. corral PR #1 をレビュー・マージ（main が脆弱なまま放置されている）
+2. ax-audit-platform の公開URL を復旧（提案書に載っている場合は差し替え）
+3. dify-rag-approval-agent の CI 失敗を解消（102テストあるのに緑でない）
+4. tool-calling-agent-mvp に CI を設置（13本中1本だけ未設置）
+5. corral の LICENSE を決定（OSS 前提の収益仮説の前提条件）
+6. 統計手法の第三者レビュー（#3・B3・C1 を顧客提示する前に）
+
+---
+
+## 7. 公開リポジトリとしての注意
+
+本リポジトリは Public。ローカル絶対パス・Vercel scope 名・社内ロードマップ・顧客仮説・価格戦略が
+すべて公開されている。非公開情報を含めるなら Private 化、または顧客/価格に関する記述を分離すること。
