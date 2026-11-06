@@ -23,6 +23,15 @@
 
 ---
 
+## 0.5 リポジトリ名について（2026-11-06 確認）
+
+**全リポジトリが `R-<番号>-<名前>` に改名されている**（例: `corral` → `R-64-corral`、
+`ax-audit-platform` → `R-33-ax-audit-platform`、本台帳 → `R-28-ai-projects-plan`）。
+GitHub API と `git clone` は旧名でもリダイレクトで通るが、**GitHub Pages の URL は新名**に
+なるため、公開URLを扱うときは必ず新名で確認する。
+
+---
+
 ## 1. 開発順
 
 6 → 5 → 1 → 4 → 2 → 3 → 7 → 8 → B/C系（順序未確定） → A1 corral（2026-07-24 以降、実質最優先）
@@ -147,15 +156,33 @@ https://github.com/hiroshi57/corral/pull/1 — CI は SUCCESS。main には**未
 | ai-platform-template | https://ai-platform-template-ten.vercel.app | 200 / 196 KB |
 | proactive-agent-ux | https://proactive-agent-ux.vercel.app | 200 / 190 KB |
 | physical-ai-llm-demo | https://physical-ai-llm-demo.vercel.app | 200 / 189 KB |
-| **ax-audit-platform** | https://ax-audit-platform.vercel.app | ❌ **404 NOT_FOUND（要再デプロイ／URL要確認）** |
+| **ax-audit-platform** | ~~https://ax-audit-platform.vercel.app~~ → **https://hiroshi57.github.io/R-33-ax-audit-platform/** | 200 / 219 KB（Pages） |
 | ai-advisor-os | https://ai-advisor-os-three.vercel.app | 200 / 193 KB |
 | d-airs-dashboard | https://d-airs-dashboard.vercel.app | 200 / 183 KB |
 | matching-agent-engine | https://matching-agent-engine.vercel.app | 200 / 194 KB |
 | dev-agent-platform | https://dev-agent-platform.vercel.app | 200 / 195 KB |
 | corral（デモ） | https://corral-tau.vercel.app | 200 / 435 B（SPAシェル）+ JSバンドル |
 
-> 旧記載「全12本 200 OK確認済み（2026-07-17）」は現時点では成立しない（**11/12**）。
+> 旧記載「全12本 200 OK確認済み（2026-07-17）」は、記載された URL のままでは成立しない。
 > URL の生存は劣化するため、**提案書に載せる前に必ず当日再確認する**こと。
+
+### ax-audit-platform が 404 だった理由（2026-11-06 調査）
+
+**デプロイは壊れていない。配信先が移っており、台帳の URL が古かった。**
+
+- Vercel プロジェクトは存在し、Production デプロイも `● Ready`（最新は 52 日前）。
+  ただし **alias が 1 件も割り当てられていない**ため `ax-audit-platform.vercel.app` が 404 になる
+  （`vercel inspect` の Aliases が空）。デプロイ URL 自体も 302（保護）を返す
+- 2026-08-24 に `.github/workflows/deploy-pages.yml` が追加され、**GitHub Pages へ移行済み**。
+  ワークフローのコメントに移行理由が明記されている:
+  「Vercelの自動ビルドがRoot Directory設定とファイル配置の不整合で不安定だった
+  （standalone.html ベースの本番デプロイが 8/20 12:48 以降一度も更新されていなかった）」
+- Pages は正常稼働: `https://hiroshi57.github.io/R-33-ax-audit-platform/` が
+  **200 / 219 KB**、タイトル「AX診断プラットフォーム（実データ入力）」。
+  Deploy to GitHub Pages は 2026-09-15 に success
+
+**判断**: 再デプロイは不要。`vercel.app` の URL を残したい場合のみ alias の再割り当てが必要だが、
+Pages 移行の経緯からすると **Pages を正とし、台帳とすべての提案資料を Pages の URL に揃える**のが筋。
 
 ---
 
@@ -167,6 +194,8 @@ https://github.com/hiroshi57/corral/pull/1 — CI は SUCCESS。main には**未
 | 2026-11-05 | test 関数数 | grep で `def test_` を全 .py から計数 | 21〜226（7月時点から増加。旧 test21〜32 表記は古い） |
 | 2026-11-05 | CI 実績 | gh run list で最新 run を取得 | 11/13 success、dify は failure、tool-calling は run 0 |
 | 2026-11-05 | corral PR #1 | gh pr view で state と checks を取得 | state=OPEN / checks=SUCCESS / **未マージ** |
+| 2026-11-06 | ax-audit-platform の404 | vercel ls / vercel inspect / Pages を curl | デプロイは Ready だが **alias 未割当**。実体は GitHub Pages に移行済みで 200 |
+| 2026-11-06 | 全14リポジトリ名 | gh api repos/... の full_name | **全リポジトリが `R-<n>-` 接頭辞付きに改名済み**（例: corral → R-64-corral） |
 | 2026-10-01 | corral セキュリティ | server/src 実コード精査 + npm audit | 権限昇格・WS無認証・秘密継承・脆弱依存を検出（PR #1） |
 
 ### 未検証項目
@@ -181,7 +210,9 @@ https://github.com/hiroshi57/corral/pull/1 — CI は SUCCESS。main には**未
 ## 6. 次アクション（優先順）
 
 1. corral PR #1 をレビュー・マージ（main が脆弱なまま放置されている）
-2. ax-audit-platform の公開URL を復旧（提案書に載っている場合は差し替え）
+2. ax-audit-platform の URL 差し替え（**本台帳は対応済み**）。提案書・営業資料に
+   `ax-audit-platform.vercel.app` が残っていれば Pages の URL へ差し替える。
+   `vercel.app` を正としたい場合のみ alias 再割り当てが必要（本番操作のため実行は別途）
 3. dify-rag-approval-agent の CI 失敗を解消（102テストあるのに緑でない）
 4. tool-calling-agent-mvp に CI を設置（13本中1本だけ未設置）
 5. corral の LICENSE を決定（OSS 前提の収益仮説の前提条件）
