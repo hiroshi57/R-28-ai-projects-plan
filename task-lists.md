@@ -32,12 +32,20 @@
 | # | ツール名 | 本番URL | GitHub | 主な用途 |
 |---|---|---|---|---|
 | 1 | GEO/LLMO診断 | https://geo-audit-tool-delta.vercel.app | hiroshi57/geo-audit-tool | URLを入れて生成AIに引用されやすい構造かを実解析・競合比較 |
-| 2 | AX診断 | https://ax-audit-platform.vercel.app | hiroshi57/ax-audit-platform | 業務を入力→AI導入の優先度とROIを実計算 |
+| 2 | AX診断 | https://hiroshi57.github.io/R-33-ax-audit-platform/ | hiroshi57/R-33-ax-audit-platform | 業務を入力→AI導入の優先度とROIを実計算 |
 | 3 | AI導入ROI検証 | https://agent-roi-poc.vercel.app | hiroshi57/agent-roi-poc | PoC実測値→年間効果・回収・導入可否 |
 | 4 | AI定着度（D-AIRS） | https://d-airs-dashboard.vercel.app | hiroshi57/d-airs-dashboard | 4ドメイン・部署別で定着度を可視化 |
 | 5 | AI顧問OS | https://ai-advisor-os-three.vercel.app | hiroshi57/ai-advisor-os | クライアントのAI活用度を事実ベースで採点 |
 | 6 | AI効果チェック（開発） | https://dev-agent-platform.vercel.app | hiroshi57/dev-agent-platform | AI利用有無で作業日数を比較・ゲーミング検知 |
 | 7 | 賃貸物件マッチング | https://matching-agent-engine.vercel.app | hiroshi57/matching-agent-engine | 条件→在庫の実照合・緩和シミュレーション |
+
+> **URL とリポジトリ名の注意（2026-11-06 実測）**
+> - #2 AX診断 は Vercel から **GitHub Pages へ移行済み**（2026-08-24、`deploy-pages.yml`）。
+>   旧 `ax-audit-platform.vercel.app` は alias 未割当のため **404**。上表は Pages の URL に差し替え済み
+> - 全リポジトリが `R-<番号>-` 接頭辞付きに**改名**されている（旧名でもリダイレクトで到達可能なため
+>   他行はそのままにしてあるが、GitHub Pages を使う場合の URL は新名になる）
+> - 上表の他の URL は 2026-11-06 時点ですべて応答を確認済み（`di-tools-api` は root が 404 だが、
+>   記載の `/api/workspace` は 400 を返すため関数は生存）
 | 8 | 言い換え対応 社内文書検索 | https://context-rerank-search.vercel.app | hiroshi57/context-rerank-search | BM25＋同義語展開。「キャンセル」で「解約」を探す |
 | 9 | 社内規程AI＋承認 | https://dify-rag-approval-agent.vercel.app | hiroshi57/dify-rag-approval-agent | 規程を実検索し条文を引用。無ければ答えない |
 | 10 | AIコスト管理 | https://ai-platform-template-ten.vercel.app | hiroshi57/ai-platform-template | 用途別トークン試算・最適モデル配分 |
